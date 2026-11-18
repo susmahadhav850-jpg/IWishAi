@@ -1,0 +1,577 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#090911">
+<title>IWishAi — Imagine. Create. Share.</title>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+:root {
+  --bg:#090911;
+  --panel:#12121f;
+  --card:#171725;
+  --purple:#a855f7;
+  --cyan:#22d3ee;
+  --muted:#9998ad;
+  --border:rgba(255,255,255,.09);
+}
+
+*{box-sizing:border-box}
+body{
+ margin:0;background:var(--bg);color:white;
+ font-family:Inter,Arial,sans-serif;
+}
+button,input{font:inherit}
+button{cursor:pointer;color:white}
+.topbar{
+ height:68px;position:sticky;top:0;z-index:10;
+ display:flex;align-items:center;gap:25px;
+ padding:0 24px;background:rgba(9,9,17,.94);
+ border-bottom:1px solid var(--border);
+ backdrop-filter:blur(18px);
+}
+.logo{
+ font-size:25px;font-weight:800;white-space:nowrap;
+ background:linear-gradient(100deg,#c084fc,#22d3ee);
+ -webkit-background-clip:text;color:transparent;
+}
+.search{
+ flex:1;max-width:430px;margin:auto;
+}
+.search input{
+ width:100%;padding:12px 17px;
+ border-radius:12px;background:#171725;
+ border:1px solid #343348;color:white;outline:none;
+}
+.search input:focus{border-color:var(--purple)}
+.nav{display:flex;align-items:center;gap:23px}
+.nav a{color:#ccc;text-decoration:none;font-size:13px}
+.nav a:hover{color:#d8a5ff}
+.create-btn,.glow-btn{
+ border:0;border-radius:25px;padding:12px 23px;
+ background:linear-gradient(100deg,#a855f7,#6d45d9,#06b6d4);
+ box-shadow:0 0 22px #9238d866;
+ font-weight:700;
+}
+.avatar{
+ width:36px;height:36px;border-radius:50%;
+ object-fit:cover;border:2px solid #a855f7;
+}
+.layout{
+ display:grid;grid-template-columns:170px minmax(0,1fr) 285px;
+ gap:18px;padding:16px;max-width:1700px;margin:auto;
+}
+.sidebar{
+ position:sticky;top:84px;height:calc(100vh - 100px);
+ border-right:1px solid var(--border);padding-right:12px;
+}
+.side-link{
+ display:flex;gap:12px;align-items:center;
+ padding:13px;border-radius:12px;
+ color:#b9b8c9;text-decoration:none;
+ font-size:13px;margin-bottom:5px;
+}
+.side-link:hover,.side-link.active{
+ background:linear-gradient(100deg,#7529ad,#42205f);
+ color:white;
+}
+.side-box{
+ margin-top:30px;padding:16px;text-align:center;
+ background:#191629;border:1px solid #49306b;
+ border-radius:15px;
+}
+.side-box h3{font-size:14px}
+.side-box p{font-size:12px;color:var(--muted)}
+.main{min-width:0}
+.hero{
+ position:relative;overflow:hidden;
+ border:1px solid var(--border);
+ border-radius:19px;background:var(--panel);
+}
+.hero img{
+ width:100%;height:335px;object-fit:cover;display:block;
+}
+.feature-tag{
+ position:absolute;top:15px;left:15px;
+ background:#11111bd9;padding:9px 13px;
+ border-radius:20px;font-size:12px;
+}
+.hero-info{padding:13px 16px}
+.hero-info p{font-size:12px;color:#c2b8d8;line-height:1.6}
+.hero-info strong{color:#d18cff}
+.section-heading{
+ display:flex;justify-content:space-between;
+ align-items:center;margin:25px 0 14px;
+}
+.section-heading h2{font-size:18px}
+.filters{
+ display:flex;gap:9px;overflow-x:auto;
+ padding-bottom:12px;
+}
+.filter{
+ white-space:nowrap;border:1px solid var(--border);
+ background:#171725;border-radius:22px;
+ padding:10px 16px;font-size:12px;
+}
+.filter.active,.filter:hover{
+ background:#7227a3;border-color:#c084fc;
+}
+.gallery{
+ columns:3;column-gap:12px;
+}
+.art-card{
+ break-inside:avoid;margin-bottom:13px;
+ background:var(--card);border:1px solid var(--border);
+ border-radius:14px;overflow:hidden;
+}
+.art-card img{
+ width:100%;display:block;object-fit:cover;
+}
+.art-content{padding:11px}
+.artist{
+ display:flex;align-items:center;gap:8px;
+ font-size:12px;font-weight:700;
+}
+.artist img{
+ width:28px;height:28px;border-radius:50%;
+ object-fit:cover;
+}
+.verified{color:#b879ff}
+.prompt{
+ font-size:11px;color:#b9b5ca;
+ line-height:1.6;margin:9px 0;
+}
+.card-actions{
+ display:flex;align-items:center;
+ justify-content:space-between;gap:5px;
+}
+.like{
+ border:0;background:transparent;color:#ff5c9b;
+ font-size:13px;padding:5px 0;
+}
+.prompt-btn{
+ border:1px solid #6a587d;background:#252236;
+ border-radius:20px;padding:7px 10px;font-size:10px;
+}
+.rightbar{min-width:0}
+.panel{
+ background:var(--panel);border:1px solid var(--border);
+ border-radius:16px;padding:14px;margin-bottom:15px;
+}
+.panel h3{font-size:15px;margin:2px 0 16px}
+.profile{
+ display:flex;align-items:center;gap:10px;
+ margin-bottom:15px;
+}
+.profile img{
+ width:39px;height:39px;border-radius:50%;
+ object-fit:cover;
+}
+.profile-info{flex:1;min-width:0}
+.profile-info strong{font-size:11px;display:block}
+.profile-info span{font-size:10px;color:var(--muted)}
+.small-btn{
+ border:1px solid #76509b;background:#21182e;
+ padding:7px 10px;border-radius:18px;font-size:10px;
+}
+.profile-banner{
+ width:100%;height:100px;object-fit:cover;
+ border-radius:10px;
+}
+.profile-stats{
+ display:flex;justify-content:space-around;
+ text-align:center;margin:17px 0;
+ font-size:11px;
+}
+.profile-stats strong{display:block;font-size:16px}
+.mini-gallery{
+ display:grid;grid-template-columns:1fr 1fr;gap:7px;
+}
+.mini-gallery img{
+ width:100%;height:105px;object-fit:cover;
+ border-radius:9px;
+}
+.floating{
+ position:fixed;right:22px;bottom:22px;z-index:8;
+ border:0;border-radius:30px;padding:16px 23px;
+ background:linear-gradient(100deg,#a855f7,#06b6d4);
+ box-shadow:0 0 25px #9b4dff88;
+ font-weight:700;
+}
+.modal{
+ display:none;position:fixed;inset:0;z-index:20;
+ background:#000b;align-items:center;justify-content:center;
+ padding:18px;
+}
+.modal.show{display:flex}
+.modal-box{
+ width:100%;max-width:450px;
+ padding:22px;background:#191827;
+ border:1px solid #7955a3;border-radius:18px;
+}
+.modal-box h2{margin-top:0}
+.modal-box textarea,.modal-box input{
+ width:100%;padding:13px;margin:8px 0;
+ border:1px solid #49405c;border-radius:10px;
+ background:#10101b;color:white;
+}
+.modal-box textarea{height:100px;resize:vertical}
+.modal-actions{display:flex;gap:10px;margin-top:15px}
+.modal-actions button{flex:1}
+.secondary{
+ border:1px solid #5b5369;background:#282537;
+ border-radius:25px;padding:12px;
+}
+.empty{color:var(--muted);font-size:12px}
+footer{text-align:center;color:#777;font-size:11px;padding:30px}
+
+@media(max-width:1050px){
+ .layout{grid-template-columns:65px minmax(0,1fr) 240px}
+ .sidebar .side-text,.side-box{display:none}
+ .side-link{justify-content:center;font-size:19px}
+ .gallery{columns:2}
+}
+@media(max-width:720px){
+ .topbar{height:60px;padding:0 12px;gap:10px}
+ .logo{font-size:20px}
+ .search{max-width:none}
+ .search input{padding:10px;font-size:11px}
+ .nav a,.nav .avatar{display:none}
+ .create-btn{padding:10px;font-size:11px}
+ .layout{display:block;padding:10px}
+ .sidebar,.rightbar{display:none}
+ .hero img{height:235px}
+ .gallery{columns:2;column-gap:9px}
+ .art-card{margin-bottom:9px}
+ .art-content{padding:8px}
+ .hero-info p{font-size:11px}
+ .floating{right:12px;bottom:15px;padding:13px 17px;font-size:12px}
+ .section-heading h2{font-size:16px}
+}
+</style>
+</head>
+
+<body>
+
+<header class="topbar">
+ <div class="logo">✦ IWishAi</div>
+ <div class="search">
+  <input id="search" placeholder="⌕ Search artworks, prompts, artists...">
+ </div>
+ <nav class="nav">
+  <a href="#explore">Explore</a>
+  <a href="#profiles">Profiles</a>
+  <button class="create-btn" onclick="openModal()">＋ Create</button>
+  <span>🔔</span>
+  <img class="avatar" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100">
+ </nav>
+</header>
+
+<div class="layout">
+
+<aside class="sidebar">
+ <a class="side-link active" href="#">⌂ <span class="side-text">Home</span></a>
+ <a class="side-link" href="#explore">⌕ <span class="side-text">Explore</span></a>
+ <a class="side-link" href="#profiles">♙ <span class="side-text">Profiles</span></a>
+ <a class="side-link" href="#">▤ <span class="side-text">Collections</span></a>
+ <a class="side-link" href="#">♜ <span class="side-text">Challenges</span></a>
+ <a class="side-link" href="#create">✧ <span class="side-text">AI Tools</span></a>
+ <hr style="border-color:#292839;margin:20px 0">
+ <a class="side-link" href="#">▧ <span class="side-text">My Library</span></a>
+ <a class="side-link" href="#">☁ <span class="side-text">Uploads</span></a>
+ <a class="side-link" href="#">♡ <span class="side-text">Liked</span></a>
+ <a class="side-link" href="#">♙ <span class="side-text">Following</span></a>
+
+ <div class="side-box">
+  <div style="font-size:35px;color:#bd78ff">▧</div>
+  <h3>Create with AI</h3>
+  <p>Generate, upload and share your AI art with the world.</p>
+  <button class="glow-btn" onclick="openModal()">＋ Generate Now</button>
+ </div>
+</aside>
+
+<main class="main">
+
+<section class="hero">
+ <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=1400&q=90" alt="Featured artwork">
+ <span class="feature-tag">⭐ Featured Artwork</span>
+ <div class="hero-info">
+  <strong>Featured Creator · NeoCanvas</strong>
+  <p><strong>Prompt:</strong> A cinematic fantasy portrait, beautiful lighting, intricate details, magical flowers, ultra-detailed, 8K realism.</p>
+ </div>
+</section>
+
+<div class="section-heading" id="explore">
+ <h2>Discover Artwork ✨</h2>
+ <span style="font-size:11px;color:#aaa">Explore the community</span>
+</div>
+
+<div class="filters">
+ <button class="filter active" data-filter="all">🔥 For You</button>
+ <button class="filter" data-filter="trending">↗ Trending</button>
+ <button class="filter" data-filter="new">✧ New</button>
+ <button class="filter" data-filter="fantasy">⚔ AI Fantasy</button>
+ <button class="filter" data-filter="realistic">◉ Realistic</button>
+ <button class="filter" data-filter="anime">♟ Anime</button>
+ <button class="filter" data-filter="scifi">◎ Sci-Fi</button>
+</div>
+
+<div class="gallery" id="gallery">
+
+<article class="art-card" data-category="anime trending">
+ <img src="https://images.unsplash.com/photo-1519608487953-e999c86e7455?w=700&q=85" loading="lazy" alt="Fantasy landscape">
+ <div class="art-content">
+  <div class="artist">
+   <img src="https://i.pravatar.cc/80?img=47"> NeoCanvas <span class="verified">✔</span>
+  </div>
+  <p class="prompt">Cyberpunk warrior in a neon city, cinematic lighting, ultra detailed.</p>
+  <div class="card-actions">
+   <button class="like" onclick="like(this)">♥ 4.8K</button>
+   <button class="prompt-btn" onclick="showPrompt(this)">View Prompt</button>
+  </div>
+  <p hidden class="full-prompt">Cyberpunk warrior in a futuristic neon city, cinematic rain, dramatic lighting, intricate outfit details, ultra realistic, 8K.</p>
+ </div>
+</article>
+
+<article class="art-card" data-category="fantasy trending">
+ <img src="https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=700&q=85" loading="lazy" alt="Fantasy castle">
+ <div class="art-content">
+  <div class="artist">
+   <img src="https://i.pravatar.cc/80?img=12"> MythicPixel <span class="verified">✔</span>
+  </div>
+  <p class="prompt">A majestic fantasy castle surrounded by mountains and magical light.</p>
+  <div class="card-actions">
+   <button class="like" onclick="like(this)">♥ 7.2K</button>
+   <button class="prompt-btn" onclick="showPrompt(this)">View Prompt</button>
+  </div>
+  <p hidden class="full-prompt">A majestic fantasy castle on a cliff with waterfalls and cherry blossoms, moonlight, intricate architecture, cinematic fantasy.</p>
+ </div>
+</article>
+
+<article class="art-card" data-category="realistic fantasy">
+ <img src="https://images.unsplash.com/photo-1546182990-dffeafbe841d?w=700&q=85" loading="lazy" alt="Wildlife portrait">
+ <div class="art-content">
+  <div class="artist">
+   <img src="https://i.pravatar.cc/80?img=5"> AetherMuse <span class="verified">✔</span>
+  </div>
+  <p class="prompt">A majestic lion with a glowing mane, fantasy, ultra detailed, cinematic.</p>
+  <div class="card-actions">
+   <button class="like" onclick="like(this)">♥ 9.1K</button>
+   <button class="prompt-btn" onclick="showPrompt(this)">View Prompt</button>
+  </div>
+  <p hidden class="full-prompt">A divine lion with a glowing golden mane, magical energy, fantasy atmosphere, photorealistic details, cinematic lighting.</p>
+ </div>
+</article>
+
+<article class="art-card" data-category="fantasy">
+ <img src="https://images.unsplash.com/photo-1511497584788-876760111969?w=700&q=85" loading="lazy" alt="Forest">
+ <div class="art-content">
+  <div class="artist"><img src="https://i.pravatar.cc/80?img=32"> InkVoid</div>
+  <p class="prompt">A mysterious forest with cinematic sunlight and rich textures.</p>
+  <div class="card-actions">
+   <button class="like" onclick="like(this)">♥ 5.6K</button>
+   <button class="prompt-btn" onclick="showPrompt(this)">View Prompt</button>
+  </div>
+  <p hidden class="full-prompt">An ancient enchanted forest, dramatic sunlight, detailed trees, atmospheric fantasy environment.</p>
+ </div>
+</article>
+
+<article class="art-card" data-category="scifi realistic">
+ <img src="https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?w=700&q=85" loading="lazy" alt="Earth from space">
+ <div class="art-content">
+  <div class="artist"><img src="https://i.pravatar.cc/80?img=13"> CosmicFrame</div>
+  <p class="prompt">An astronaut sitting on a moon rock, looking at Earth, ultra realistic.</p>
+  <div class="card-actions">
+   <button class="like" onclick="like(this)">♥ 6.4K</button>
+   <button class="prompt-btn" onclick="showPrompt(this)">View Prompt</button>
+  </div>
+  <p hidden class="full-prompt">An astronaut sitting on a moon rock, looking at Earth, ultra realistic, detailed spacesuit, cinematic space photography.</p>
+ </div>
+</article>
+
+<article class="art-card" data-category="anime trending">
+ <img src="https://images.unsplash.com/photo-1518709594023-6eab9bab7b23?w=700&q=85" loading="lazy" alt="Colorful fantasy scene">
+ <div class="art-content">
+  <div class="artist"><img src="https://i.pravatar.cc/80?img=44"> PixelVibe</div>
+  <p class="prompt">A futuristic neon dream, vibrant colors, glowing lights, cinematic atmosphere.</p>
+  <div class="card-actions">
+   <button class="like" onclick="like(this)">♥ 8.7K</button>
+   <button class="prompt-btn" onclick="showPrompt(this)">View Prompt</button>
+  </div>
+  <p hidden class="full-prompt">A futuristic neon dream world, vibrant purple and cyan lighting, detailed digital art, cinematic composition.</p>
+ </div>
+</article>
+
+</div>
+<p id="noResults" class="empty" style="display:none">No matching artworks found.</p>
+
+</main>
+
+<aside class="rightbar" id="profiles">
+ <div class="panel">
+  <h3>Trending Profiles 🔥</h3>
+
+  <div class="profile">
+   <img src="https://i.pravatar.cc/100?img=47">
+   <div class="profile-info"><strong>NeoCanvas ✔</strong><span>124.3K followers</span></div>
+   <button class="small-btn" onclick="alert('Gallery coming soon!')">View</button>
+  </div>
+
+  <div class="profile">
+   <img src="https://i.pravatar.cc/100?img=12">
+   <div class="profile-info"><strong>AetherMuse ✔</strong><span>98.7K followers</span></div>
+   <button class="small-btn" onclick="alert('Gallery coming soon!')">View</button>
+  </div>
+
+  <div class="profile">
+   <img src="https://i.pravatar.cc/100?img=5">
+   <div class="profile-info"><strong>MythicPixel ✔</strong><span>77.2K followers</span></div>
+   <button class="small-btn" onclick="alert('Gallery coming soon!')">View</button>
+  </div>
+
+  <div class="profile">
+   <img src="https://i.pravatar.cc/100?img=44">
+   <div class="profile-info"><strong>PixelVibe ✔</strong><span>65.1K followers</span></div>
+   <button class="small-btn" onclick="alert('Gallery coming soon!')">View</button>
+  </div>
+ </div>
+
+ <div class="panel">
+  <img class="profile-banner" src="https://images.unsplash.com/photo-1519608487953-e999c86e7455?w=700">
+  <h3 style="margin-top:12px">AetherMuse ✔</h3>
+  <span style="color:#aaa;font-size:12px">@AetherMuse</span>
+  <div class="profile-stats">
+   <div><strong>412</strong>Artworks</div>
+   <div><strong>98.7K</strong>Followers</div>
+   <div><strong>86</strong>Following</div>
+  </div>
+  <p style="font-size:11px;color:#aaa">AI Artist · Fantasy · Realism · Mythology</p>
+  <button class="glow-btn" style="width:100%" onclick="alert('Profile coming soon!')">View Gallery</button>
+  <h3 style="margin-top:18px">Featured Gallery</h3>
+  <div class="mini-gallery">
+   <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300">
+   <img src="https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=300">
+   <img src="https://images.unsplash.com/photo-1511497584788-876760111969?w=300">
+   <img src="https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?w=300">
+  </div>
+ </div>
+</aside>
+
+</div>
+
+<footer>© 2026 IWishAi · Imagine. Create. Share. ✦</footer>
+
+<button class="floating" onclick="openModal()">＋ Upload / Generate</button>
+
+<div class="modal" id="modal">
+ <div class="modal-box">
+  <h2>✦ Create with IWishAi</h2>
+  <p style="color:#aaa;font-size:12px">Share your imagination with the world.</p>
+  <textarea id="userPrompt" placeholder="Describe your artwork or AI image prompt..."></textarea>
+  <label style="font-size:12px;color:#bbb">Upload an image</label>
+  <input type="file" id="imageFile" accept="image/*">
+  <img id="preview" style="width:100%;max-height:180px;object-fit:contain;display:none;border-radius:10px">
+  <p id="modalMessage" class="empty"></p>
+  <div class="modal-actions">
+   <button class="secondary" onclick="closeModal()">Cancel</button>
+   <button class="glow-btn" onclick="submitArtwork()">Continue</button>
+  </div>
+ </div>
+</div>
+
+<div class="modal" id="promptModal">
+ <div class="modal-box">
+  <h2>Artwork Prompt ✨</h2>
+  <p id="promptText" style="font-size:13px;line-height:1.7;color:#ccc"></p>
+  <div class="modal-actions">
+   <button class="secondary" onclick="closePrompt()">Close</button>
+   <button class="glow-btn" onclick="copyPrompt()">Copy Prompt</button>
+  </div>
+ </div>
+</div>
+
+<script>
+const modal=document.getElementById('modal');
+const promptModal=document.getElementById('promptModal');
+
+function openModal(){
+ modal.classList.add('show');
+}
+function closeModal(){
+ modal.classList.remove('show');
+}
+function showPrompt(button){
+ const card=button.closest('.art-card');
+ document.getElementById('promptText').textContent=
+ card.querySelector('.full-prompt').textContent;
+ promptModal.classList.add('show');
+}
+function closePrompt(){
+ promptModal.classList.remove('show');
+}
+function copyPrompt(){
+ const text=document.getElementById('promptText').textContent;
+ navigator.clipboard.writeText(text)
+ .then(()=>alert('Prompt copied!'))
+ .catch(()=>alert(text));
+}
+function like(button){
+ const liked=button.dataset.liked==='true';
+ button.dataset.liked=String(!liked);
+ let count=parseFloat(button.textContent.replace('♥',''));
+ button.textContent='♥ '+(liked?(count-.1).toFixed(1):(count+.1).toFixed(1))+'K';
+ button.style.color=liked?'#ff5c9b':'#ff174f';
+}
+document.querySelectorAll('.filter').forEach(button=>{
+ button.addEventListener('click',()=>{
+  document.querySelectorAll('.filter').forEach(b=>b.classList.remove('active'));
+  button.classList.add('active');
+  const category=button.dataset.filter;
+  filterCards(category,document.getElementById('search').value);
+ });
+});
+function filterCards(category,query){
+ let visible=0;
+ document.querySelectorAll('.art-card').forEach(card=>{
+  const matchesCategory=category==='all'||card.dataset.category.includes(category);
+  const matchesText=card.textContent.toLowerCase().includes(query.toLowerCase());
+  card.style.display=matchesCategory&&matchesText?'':'none';
+  if(matchesCategory&&matchesText)visible++;
+ });
+ document.getElementById('noResults').style.display=visible?'none':'block';
+}
+document.getElementById('search').addEventListener('input',e=>{
+ const active=document.querySelector('.filter.active');
+ filterCards(active.dataset.filter,e.target.value);
+});
+document.getElementById('imageFile').addEventListener('change',e=>{
+ const file=e.target.files[0];
+ if(!file)return;
+ const preview=document.getElementById('preview');
+ preview.src=URL.createObjectURL(file);
+ preview.style.display='block';
+});
+function submitArtwork(){
+ const prompt=document.getElementById('userPrompt').value.trim();
+ const file=document.getElementById('imageFile').files[0];
+ const message=document.getElementById('modalMessage');
+ if(!prompt&&!file){
+  message.textContent='Please enter a prompt or select an image.';
+  return;
+ }
+ message.textContent='Your input is ready! Backend upload and AI generation will be connected in the next development phase.';
+}
+modal.addEventListener('click',e=>{
+ if(e.target===modal)closeModal();
+});
+promptModal.addEventListener('click',e=>{
+ if(e.target===promptModal)closePrompt();
+});
+</script>
+
+</body>
+</html>
