@@ -522,6 +522,52 @@ footer{text-align:center;color:#777;font-size:11px;padding:30px}
  </div>
 </div>
 
+<div class="modal" id="authModal">
+  <div class="modal-box">
+    <h2>✦ Welcome to IWishAi</h2>
+    <p style="color:#aaa;font-size:12px">
+      Join the community of AI artists.
+    </p>
+
+    <input
+      id="displayName"
+      type="text"
+      placeholder="Your artist name (for registration)"
+      autocomplete="name"
+    >
+
+    <input
+      id="authEmail"
+      type="email"
+      placeholder="Email address"
+      autocomplete="email"
+    >
+
+    <input
+      id="authPassword"
+      type="password"
+      placeholder="Password (minimum 6 characters)"
+      autocomplete="current-password"
+    >
+
+    <p id="authMessage" class="empty" aria-live="polite"></p>
+
+    <div class="modal-actions">
+      <button class="secondary" onclick="closeAuthModal()">
+        Close
+      </button>
+
+      <button class="secondary" onclick="signIn()">
+        Login
+      </button>
+
+      <button class="glow-btn" onclick="signUp()">
+        Sign Up
+      </button>
+    </div>
+  </div>
+</div>
+
 <script>
 const modal=document.getElementById('modal');
 const promptModal=document.getElementById('promptModal');
