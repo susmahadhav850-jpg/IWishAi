@@ -1153,22 +1153,139 @@ function closeModal() {
 }
 
 /* ==========================================
-   PROMPT VIEWER
+   IWISHAI ARTWORK PROMPT VIEWER
    ========================================== */
+
+const fullScreenModal =
+  document.getElementById("fullScreenModal");
+
+let currentArtworkUrl = "";
+
+/* SHOW ARTWORK AND PROMPT */
 
 function showPrompt(button) {
 
   const card = button.closest(".art-card");
 
+  const artworkImage =
+    card.querySelector(":scope > img");
+
+  const prompt =
+    card.querySelector(".full-prompt");
+
+  if (!artworkImage || !prompt) {
+    alert("Artwork information not found.");
+    return;
+  }
+
+  currentArtworkUrl = artworkImage.src;
+
+  document.getElementById("promptImage").src =
+    currentArtworkUrl;
+
   document.getElementById("promptText").textContent =
-    card.querySelector(".full-prompt").textContent;
+    prompt.textContent.trim();
 
   promptModal.classList.add("show");
 }
 
+/* CLOSE PROMPT */
+
 function closePrompt() {
   promptModal.classList.remove("show");
 }
+
+/* OPEN FULL SCREEN */
+
+function openFullScreenArtwork() {
+
+  if (!currentArtworkUrl) return;
+
+  document.getElementById("fullScreenImage").src =
+    currentArtworkUrl;
+
+  fullScreenModal.classList.add("show");
+}
+
+/* CLOSE FULL SCREEN */
+
+function closeFullScreenArtwork() {
+
+  fullScreenModal.classList.remove("show");
+
+}
+
+/* DOWNLOAD ORIGINAL IMAGE */
+
+async function downloadCurrentArtwork() {
+
+  if (!currentArtworkUrl) return;
+
+  const button =
+    document.querySelector(".download-artwork-btn");
+
+  button.disabled = true;
+  button.textContent = "Preparing download...";
+
+  try {
+
+    const response = await fetch(currentArtworkUrl);
+
+    if (!response.ok) {
+      throw new Error("Unable to download image.");
+    }
+
+    const blob = await response.blob();
+
+    const downloadUrl =
+      URL.createObjectURL(blob);
+
+    const originalName =
+      decodeURIComponent(
+        new URL(currentArtworkUrl).pathname.split("/").pop()
+      );
+
+    const link = document.createElement("a");
+
+    link.href = downloadUrl;
+
+    link.download = originalName || "iwishai-artwork";
+
+    document.body.appendChild(link);
+
+    link.click();
+
+    link.remove();
+
+    setTimeout(() => {
+      URL.revokeObjectURL(downloadUrl);
+    }, 1000);
+
+    button.textContent = "✓ Downloaded!";
+
+  } catch (error) {
+
+    console.error("Download error:", error);
+
+    button.textContent = "Download failed";
+
+    alert(
+      "Unable to download this image. Please try again."
+    );
+
+  } finally {
+
+    button.disabled = false;
+
+    setTimeout(() => {
+      button.textContent = "⬇ Download Original Image";
+    }, 2000);
+
+  }
+
+}
+
+/* COPY PROMPT */
 
 function copyPrompt() {
 
@@ -1180,6 +1297,16 @@ function copyPrompt() {
     .catch(() => alert(text));
 
 }
+
+/* CLOSE VIEWER WHEN BACKDROP IS CLICKED */
+
+fullScreenModal.addEventListener("click", event => {
+
+  if (event.target === fullScreenModal) {
+    closeFullScreenArtwork();
+  }
+
+});
 
 /* ==========================================
    LIKE BUTTON
