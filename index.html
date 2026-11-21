@@ -274,7 +274,106 @@ footer{text-align:center;color:#777;font-size:11px;padding:30px}
     font-size: 10px;
   }
 }
-  
+
+/* ==========================================
+   IWISHAI ARTWORK IMAGE PREVIEW
+   ========================================== */
+
+.prompt-image-wrap {
+  position: relative;
+  width: 100%;
+  margin-bottom: 18px;
+  background: #090911;
+  border-radius: 13px;
+  overflow: hidden;
+}
+
+#promptImage {
+  display: block;
+  width: 100%;
+  max-height: 260px;
+  object-fit: contain;
+}
+
+.expand-artwork-btn {
+  position: absolute;
+  right: 12px;
+  top: 12px;
+  width: 43px;
+  height: 43px;
+  border: 1px solid #ffffff55;
+  border-radius: 12px;
+  background: #11111bdc;
+  font-size: 24px;
+  cursor: pointer;
+}
+
+/* ==========================================
+   FULL SCREEN ARTWORK VIEWER
+   ========================================== */
+
+.fullscreen-box {
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  border: 0;
+  border-radius: 0;
+  padding: 16px;
+  background: #080811;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.fullscreen-close {
+  align-self: flex-end;
+  border: 1px solid #ffffff44;
+  background: #21182e;
+  border-radius: 50%;
+  width: 43px;
+  height: 43px;
+  font-size: 22px;
+  margin-bottom: 12px;
+}
+
+.fullscreen-image-wrap {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+}
+
+#fullScreenImage {
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+}
+
+.download-artwork-btn {
+  flex-shrink: 0;
+  width: 100%;
+  margin-top: 15px;
+  padding: 17px;
+  border: none;
+  border-radius: 30px;
+  background: linear-gradient(
+    100deg,
+    #a855f7,
+    #6d45d9,
+    #06b6d4
+  );
+  box-shadow: 0 0 25px #9238d866;
+  color: white;
+  font-size: 16px;
+  font-weight: 800;
+  cursor: pointer;
+}
+ 
 </style>
 
 <!-- SUPABASE LIBRARY -->
