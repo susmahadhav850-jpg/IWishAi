@@ -1130,19 +1130,12 @@ document.getElementById("imageFile").addEventListener(
 );
 
 /* ==========================================
-   ARTWORK SUBMISSION PLACEHOLDER
+   REAL IWISHAI ARTWORK UPLOAD
    ========================================== */
 
-function submitArtwork() {
+async function submitArtwork() {
 
-  if (!currentUser) {
-
-    closeModal();
-
-    openAuthModal();
-
-    return;
-  }
+  const message = document.getElementById("modalMessage");
 
   const prompt =
     document.getElementById("userPrompt").value.trim();
@@ -1150,19 +1143,190 @@ function submitArtwork() {
   const file =
     document.getElementById("imageFile").files[0];
 
-  const message =
-    document.getElementById("modalMessage");
+  const submitButton =
+    modal.querySelector(".modal-actions .glow-btn");
 
-  if (!prompt && !file) {
-
-    message.textContent =
-      "Please enter a prompt or select an image.";
-
+  if (!file) {
+    message.textContent = "Please select an artwork image.";
     return;
   }
 
-  message.textContent =
-    "Your account is connected! Image storage and artwork publishing will be enabled in the next step.";
+  if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
+    message.textContent =
+      "Please upload JPG, PNG, WEBP, GIF or AVIF images.";
+    return;
+  }
+
+  if (file.size > MAX_ARTWORK_SIZE) {
+    message.textContent =
+      "Image must be smaller than 20 MB.";
+    return;
+  }
+
+  if (submitButton.disabled) return;
+
+  submitButton.disabled = true;
+  message.textContent = "Uploading your artwork...";
+
+  try {
+
+    /* ==================================
+       VERIFY CURRENT AUTHENTICATED USER
+       ================================== */
+
+    const { data: userData, error: userError } =
+      await supabaseClient.auth.getUser();
+
+    if (userError || !userData.user) {
+      throw new Error("Please log in again before uploading.");
+    }
+
+    currentUser = userData.user;
+
+    const userId = currentUser.id;
+
+    /* ==================================
+       CREATE UNIQUE IMAGE PATH
+       ================================== */
+
+    const extensions = {
+      "image/jpeg": "jpg",
+      "image/png": "png",
+      "image/webp": "webp",
+      "image/gif": "gif",
+      "image/avif": "avif"
+    };
+
+    const extension = extensions[file.type];
+
+    const uniqueId =
+      crypto.randomUUID();
+
+    const filePath =
+      `${userId}/${uniqueId}.${extension}`;
+
+    /* ==================================
+       UPLOAD IMAGE TO SUPABASE STORAGE
+       ================================== */
+
+    const { error: uploadError } =
+      await supabaseClient.storage
+        .from(ARTWORK_BUCKET)
+        .upload(filePath, file, {
+          cacheControl: "3600",
+          contentType: file.type,
+          upsert: false
+        });
+
+    if (uploadError) {
+      throw new Error(
+        "Image upload failed: " + uploadError.message
+      );
+    }
+
+    /* ==================================
+       GET PUBLIC IMAGE URL
+       ================================== */
+
+    const { data: publicData } =
+      supabaseClient.storage
+        .from(ARTWORK_BUCKET)
+        .getPublicUrl(filePath);
+
+    const imageUrl = publicData.publicUrl;
+
+    /* ==================================
+       SAVE ARTWORK DETAILS IN DATABASE
+       ================================== */
+
+    const artworkTitle =
+      prompt
+        ? prompt.substring(0, 80)
+        : file.name.replace(/\.[^/.]+$/, "").substring(0, 80);
+
+    const { data: savedArtwork, error: databaseError } =
+      await supabaseClient
+        .from("artworks")
+        .insert({
+          user_id: userId,
+          title: artworkTitle,
+          prompt: prompt || null,
+          image_url: imageUrl,
+          category: "new",
+          visibility: "public",
+          status: "published"
+        })
+        .select()
+        .single();
+
+    if (databaseError) {
+      console.error("Artwork database error:", databaseError);
+
+      throw new Error(
+        "Image uploaded, but artwork publishing failed: " +
+        databaseError.message
+      );
+    }
+
+    /* ==================================
+       DISPLAY NEW ARTWORK IMMEDIATELY
+       ================================== */
+
+    const gallery =
+      document.getElementById("gallery");
+
+    const newCard =
+      createCommunityArtworkCard(savedArtwork);
+
+    gallery.prepend(newCard);
+
+    // Switch to New so the uploaded image is visible.
+    document.querySelectorAll(".filter").forEach(button => {
+      button.classList.remove("active");
+    });
+
+    const newFilter =
+      document.querySelector('.filter[data-filter="new"]');
+
+    newFilter.classList.add("active");
+
+    filterCards("new", "");
+
+    /* ==================================
+       RESET UPLOAD FORM
+       ================================== */
+
+    document.getElementById("userPrompt").value = "";
+
+    document.getElementById("imageFile").value = "";
+
+    const preview =
+      document.getElementById("preview");
+
+    if (preview.src.startsWith("blob:")) {
+      URL.revokeObjectURL(preview.src);
+    }
+
+    preview.src = "";
+    preview.style.display = "none";
+
+    message.textContent = "Artwork published successfully! 🎉";
+
+    alert("Your artwork is now live on IWishAi! 🎨");
+
+    closeModal();
+
+  } catch (error) {
+
+    console.error("IWishAi upload error:", error);
+
+    message.textContent = error.message;
+
+  } finally {
+
+    submitButton.disabled = false;
+
+  }
 
 }
 
