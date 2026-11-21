@@ -612,12 +612,46 @@ footer{text-align:center;color:#777;font-size:11px;padding:30px}
 
 <div class="modal" id="promptModal">
  <div class="modal-box">
-  <h2>Artwork Prompt ✨</h2>
-  <p id="promptText" style="font-size:13px;line-height:1.7;color:#ccc"></p>
-  <div class="modal-actions">
-   <button class="secondary" onclick="closePrompt()">Close</button>
-   <button class="glow-btn" onclick="copyPrompt()">Copy Prompt</button>
+
+  <!-- ARTWORK IMAGE PREVIEW -->
+
+  <div class="prompt-image-wrap">
+
+   <img
+    id="promptImage"
+    src=""
+    alt="Artwork preview"
+   >
+
+   <button
+    class="expand-artwork-btn"
+    onclick="openFullScreenArtwork()"
+    title="View full screen"
+   >⛶</button>
+
   </div>
+
+  <h2>Artwork Prompt ✨</h2>
+
+  <p
+   id="promptText"
+   style="font-size:13px;line-height:1.7;color:#ccc"
+  ></p>
+
+  <div class="modal-actions">
+
+   <button
+    class="secondary"
+    onclick="closePrompt()"
+   >Close</button>
+
+   <button
+    class="glow-btn"
+    onclick="copyPrompt()"
+   >Copy Prompt</button>
+
+  </div>
+
  </div>
 </div>
 
