@@ -586,6 +586,21 @@ const supabaseClient = window.supabase.createClient(
 );
 
 /* ==========================================
+   IWISHAI STORAGE CONFIGURATION
+   ========================================== */
+
+const ARTWORK_BUCKET = "iwishai-artworks";
+const MAX_ARTWORK_SIZE = 20 * 1024 * 1024;
+
+const ALLOWED_IMAGE_TYPES = [
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+  "image/gif",
+  "image/avif"
+];
+
+/* ==========================================
    ELEMENTS AND USER SESSION
    ========================================== */
 
