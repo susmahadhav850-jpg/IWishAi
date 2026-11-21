@@ -840,6 +840,128 @@ supabaseClient.auth.onAuthStateChange(
   }
 );
 
+
+/* ==========================================
+   LOAD AND DISPLAY COMMUNITY ARTWORKS
+   ========================================== */
+
+function createCommunityArtworkCard(artwork) {
+
+  const card = document.createElement("article");
+  card.className = "art-card";
+  card.dataset.category = "new";
+
+  const image = document.createElement("img");
+  image.src = artwork.image_url;
+  image.alt = artwork.title || "Community artwork";
+  image.loading = "lazy";
+
+  const content = document.createElement("div");
+  content.className = "art-content";
+
+  const artist = document.createElement("div");
+  artist.className = "artist";
+
+  const avatar = document.createElement("img");
+  avatar.src = "https://i.pravatar.cc/80?img=47";
+  avatar.alt = "Artist";
+
+  const artistName = document.createElement("span");
+  artistName.textContent = "IWishAi Creator";
+
+  const prompt = document.createElement("p");
+  prompt.className = "prompt";
+  prompt.textContent = artwork.prompt || artwork.title || "Community artwork";
+
+  const actions = document.createElement("div");
+  actions.className = "card-actions";
+
+  const likeButton = document.createElement("button");
+  likeButton.className = "like";
+  likeButton.textContent = "♥ 0";
+  likeButton.addEventListener("click", () => like(likeButton));
+
+  const promptButton = document.createElement("button");
+  promptButton.className = "prompt-btn";
+  promptButton.textContent = "View Prompt";
+  promptButton.addEventListener("click", () => showPrompt(promptButton));
+
+  const fullPrompt = document.createElement("p");
+  fullPrompt.className = "full-prompt";
+  fullPrompt.hidden = true;
+  fullPrompt.textContent = artwork.prompt || artwork.title || "";
+
+  artist.append(avatar, artistName);
+  actions.append(likeButton, promptButton);
+  content.append(artist, prompt, actions, fullPrompt);
+  card.append(image, content);
+
+  return card;
+}
+
+
+/* ==========================================
+   FETCH PUBLISHED ARTWORKS
+   ========================================== */
+
+async function loadCommunityArtworks() {
+
+  const gallery = document.getElementById("gallery");
+
+  const { data, error } = await supabaseClient
+    .from("artworks")
+    .select(`
+      id,
+      user_id,
+      title,
+      prompt,
+      image_url,
+      category,
+      created_at
+    `)
+    .eq("visibility", "public")
+    .eq("status", "published")
+    .order("created_at", { ascending: false })
+    .limit(30);
+
+  if (error) {
+    console.error("Gallery loading error:", error);
+    return;
+  }
+
+  if (!data || data.length === 0) {
+    return;
+  }
+
+  // Insert oldest first so newest appears at the top.
+  [...data].reverse().forEach(artwork => {
+
+    const card = createCommunityArtworkCard(artwork);
+
+    gallery.prepend(card);
+
+  });
+
+  // Apply the currently selected gallery filter.
+  const activeFilter =
+    document.querySelector(".filter.active");
+
+  if (activeFilter) {
+    filterCards(
+      activeFilter.dataset.filter,
+      document.getElementById("search").value
+    );
+  }
+
+}
+
+/* ==========================================
+   LOAD GALLERY ON WEBSITE STARTUP
+   ========================================== */
+
+loadCommunityArtworks();
+
+  
 /* ==========================================
    CREATE ARTWORK MODAL
    ========================================== */
