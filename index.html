@@ -655,6 +655,40 @@ footer{text-align:center;color:#777;font-size:11px;padding:30px}
  </div>
 </div>
 
+<!-- ==========================================
+     FULL SCREEN ARTWORK VIEWER
+     ========================================== -->
+
+<div class="modal" id="fullScreenModal">
+
+ <div class="fullscreen-box">
+
+  <button
+   class="fullscreen-close"
+   onclick="closeFullScreenArtwork()"
+  >✕</button>
+
+  <div class="fullscreen-image-wrap">
+
+   <img
+    id="fullScreenImage"
+    src=""
+    alt="Full screen artwork"
+   >
+
+  </div>
+
+  <button
+   class="download-artwork-btn"
+   onclick="downloadCurrentArtwork()"
+  >
+   ⬇ Download Original Image
+  </button>
+
+ </div>
+
+</div>
+
 <div class="modal" id="authModal">
   <div class="modal-box">
     <h2>✦ Welcome to IWishAi</h2>
