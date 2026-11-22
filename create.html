@@ -1,0 +1,177 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#090911">
+
+<title>Create Artwork — IWishAi</title>
+
+<style>
+:root {
+  --bg:#090911;
+  --panel:#171725;
+  --purple:#a855f7;
+  --cyan:#22d3ee;
+  --muted:#9998ad;
+  --border:rgba(255,255,255,.1);
+}
+
+* {
+  box-sizing:border-box;
+}
+
+body {
+  margin:0;
+  background:var(--bg);
+  color:white;
+  font-family:Arial,sans-serif;
+}
+
+button,textarea {
+  font:inherit;
+}
+
+button {
+  cursor:pointer;
+  color:white;
+}
+
+.topbar {
+  height:68px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 22px;
+  background:#10101b;
+  border-bottom:1px solid var(--border);
+}
+
+.logo {
+  font-size:24px;
+  font-weight:800;
+  background:linear-gradient(100deg,#c084fc,#22d3ee);
+  -webkit-background-clip:text;
+  color:transparent;
+}
+
+.back-btn {
+  background:#21182e;
+  border:1px solid #7955a3;
+  padding:10px 17px;
+  border-radius:22px;
+}
+
+.container {
+  max-width:900px;
+  margin:35px auto;
+  padding:18px;
+}
+
+.heading {
+  margin-bottom:25px;
+}
+
+.heading h1 {
+  font-size:29px;
+  margin-bottom:8px;
+}
+
+.heading p {
+  color:var(--muted);
+  font-size:13px;
+}
+
+.studio {
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:19px;
+  padding:22px;
+}
+
+.studio h3 {
+  font-size:15px;
+  margin:0 0 15px;
+}
+
+.placeholder {
+  min-height:260px;
+  border:1px dashed #73529b;
+  border-radius:15px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-direction:column;
+  text-align:center;
+  padding:25px;
+  color:var(--muted);
+}
+
+.placeholder strong {
+  color:white;
+  font-size:18px;
+  margin-bottom:9px;
+}
+
+.placeholder span {
+  font-size:12px;
+}
+
+@media(max-width:600px) {
+  .container {
+    margin:15px auto;
+    padding:12px;
+  }
+
+  .heading h1 {
+    font-size:23px;
+  }
+
+  .studio {
+    padding:16px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<header class="topbar">
+
+  <div class="logo">✦ IWishAi</div>
+
+  <button
+    class="back-btn"
+    onclick="window.location.href='index.html'"
+  >
+    ← Back to Explore
+  </button>
+
+</header>
+
+<main class="container">
+
+  <div class="heading">
+    <h1>✦ AI Creation Studio</h1>
+    <p>Turn your imagination into artwork.</p>
+  </div>
+
+  <section class="studio">
+
+    <div class="placeholder">
+
+      <strong>🎨 Your Creative Studio</strong>
+
+      <span>
+        We're preparing your AI creation workspace.
+      </span>
+
+    </div>
+
+  </section>
+
+</main>
+
+</body>
+</html>
