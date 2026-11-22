@@ -996,7 +996,33 @@ async function initializeAuth() {
 }
 
 initializeAuth();
+/* ==========================================
+   NAVIGATE TO AI CREATION STUDIO
+   ========================================== */
 
+async function goToCreatePage() {
+
+  const { data, error } =
+    await supabaseClient.auth.getSession();
+
+  if (error) {
+    alert("Unable to check login. Please try again.");
+    return;
+  }
+
+  if (!data.session) {
+
+    openAuthModal();
+
+    authMessage.textContent =
+      "Please log in before creating artwork.";
+
+    return;
+  }
+
+  window.location.href = "create.html";
+
+}
 supabaseClient.auth.onAuthStateChange(
   (_event, session) => {
 
