@@ -5,38 +5,34 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#090911">
+<title>AI Creation Studio — IWishAi</title>
 
-<title>Create Artwork — IWishAi</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
 :root {
   --bg:#090911;
-  --panel:#171725;
+  --panel:#151522;
+  --card:#1c1b2b;
   --purple:#a855f7;
   --cyan:#22d3ee;
   --muted:#9998ad;
-  --border:rgba(255,255,255,.1);
+  --border:rgba(255,255,255,.09);
 }
 
-* {
-  box-sizing:border-box;
-}
+* {box-sizing:border-box}
 
 body {
   margin:0;
   background:var(--bg);
   color:white;
-  font-family:Arial,sans-serif;
+  font-family:Inter,Arial,sans-serif;
 }
 
-button,textarea {
-  font:inherit;
-}
-
-button {
-  cursor:pointer;
-  color:white;
-}
+button,textarea,input,select {font:inherit}
+button {cursor:pointer;color:white}
 
 .topbar {
   height:68px;
@@ -46,6 +42,9 @@ button {
   padding:0 22px;
   background:#10101b;
   border-bottom:1px solid var(--border);
+  position:sticky;
+  top:0;
+  z-index:10;
 }
 
 .logo {
@@ -64,13 +63,9 @@ button {
 }
 
 .container {
-  max-width:900px;
-  margin:35px auto;
-  padding:18px;
-}
-
-.heading {
-  margin-bottom:25px;
+  max-width:1000px;
+  margin:30px auto;
+  padding:15px;
 }
 
 .heading h1 {
@@ -88,49 +83,255 @@ button {
   border:1px solid var(--border);
   border-radius:19px;
   padding:22px;
+  margin-top:25px;
 }
 
-.studio h3 {
+.section {
+  margin-bottom:27px;
+}
+
+.section h3 {
   font-size:15px;
-  margin:0 0 15px;
+  margin:0 0 13px;
 }
 
-.placeholder {
-  min-height:260px;
+.section small {
+  color:var(--muted);
+  font-size:11px;
+}
+
+.prompt-box {
+  width:100%;
+  min-height:145px;
+  padding:15px;
+  border:1px solid #49405c;
+  border-radius:12px;
+  background:#0e0e19;
+  color:white;
+  resize:vertical;
+  outline:none;
+  line-height:1.7;
+}
+
+.prompt-box:focus,
+select:focus {
+  border-color:var(--purple);
+}
+
+.negative {
+  min-height:75px;
+  margin-top:10px;
+}
+
+.counter {
+  text-align:right;
+  color:var(--muted);
+  font-size:10px;
+  margin-top:6px;
+}
+
+.option-grid {
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:10px;
+}
+
+.option {
+  border:1px solid var(--border);
+  border-radius:11px;
+  padding:13px 7px;
+  background:#1c1b2b;
+  font-size:12px;
+  transition:.2s;
+}
+
+.option:hover,
+.option.active {
+  border-color:#bd78ff;
+  background:#492568;
+  box-shadow:0 0 15px #a855f733;
+}
+
+.ratio-grid {
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:10px;
+}
+
+.resolution-grid {
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:10px;
+}
+
+.resolution {
+  border:1px solid var(--border);
+  background:#1c1b2b;
+  border-radius:12px;
+  padding:15px 5px;
+  text-align:center;
+}
+
+.resolution strong {
+  display:block;
+  font-size:18px;
+}
+
+.resolution span {
+  color:var(--muted);
+  font-size:10px;
+}
+
+select {
+  width:100%;
+  padding:14px;
+  border-radius:11px;
+  border:1px solid #49405c;
+  background:#10101b;
+  color:white;
+  outline:none;
+}
+
+.upload-area {
+  border:1px dashed #7955a3;
+  border-radius:13px;
+  padding:25px 15px;
+  text-align:center;
+  background:#10101b;
+}
+
+.upload-area label {
+  display:block;
+  cursor:pointer;
+}
+
+.upload-area strong {
+  display:block;
+  margin-bottom:8px;
+}
+
+.upload-area p {
+  color:var(--muted);
+  font-size:11px;
+}
+
+#referenceInput {
+  display:none;
+}
+
+#referencePreview {
+  display:none;
+  max-width:100%;
+  max-height:220px;
+  object-fit:contain;
+  margin:15px auto 0;
+  border-radius:10px;
+}
+
+.generate-btn {
+  width:100%;
+  border:0;
+  border-radius:30px;
+  padding:17px;
+  font-size:16px;
+  font-weight:800;
+  background:linear-gradient(100deg,#a855f7,#6d45d9,#06b6d4);
+  box-shadow:0 0 23px #9238d866;
+}
+
+.generate-btn:disabled,
+.publish-btn:disabled {
+  opacity:.5;
+  cursor:not-allowed;
+}
+
+.status {
+  color:#c084fc;
+  font-size:12px;
+  text-align:center;
+  margin-top:13px;
+  line-height:1.6;
+}
+
+.preview-box {
+  min-height:300px;
   border:1px dashed #73529b;
   border-radius:15px;
+  background:#0e0e19;
   display:flex;
   align-items:center;
   justify-content:center;
-  flex-direction:column;
+  overflow:hidden;
+  padding:15px;
+}
+
+.preview-box img {
+  display:none;
+  max-width:100%;
+  max-height:550px;
+  object-fit:contain;
+  border-radius:10px;
+}
+
+.preview-placeholder {
   text-align:center;
-  padding:25px;
   color:var(--muted);
+  font-size:13px;
 }
 
-.placeholder strong {
-  color:white;
-  font-size:18px;
-  margin-bottom:9px;
+.preview-placeholder strong {
+  display:block;
+  font-size:35px;
+  margin-bottom:12px;
 }
 
-.placeholder span {
-  font-size:12px;
+.publish-options {
+  display:flex;
+  gap:12px;
+  flex-wrap:wrap;
+}
+
+.visibility {
+  background:#1c1b2b;
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:12px;
+  flex:1;
+  min-width:120px;
+  text-align:center;
+}
+
+.visibility.active {
+  border-color:var(--purple);
+  background:#38204d;
+}
+
+.publish-btn {
+  width:100%;
+  margin-top:15px;
+  padding:15px;
+  border:0;
+  border-radius:25px;
+  background:linear-gradient(100deg,#a855f7,#06b6d4);
+  font-weight:800;
+}
+
+.footer-note {
+  text-align:center;
+  color:var(--muted);
+  font-size:11px;
+  margin-top:25px;
 }
 
 @media(max-width:600px) {
-  .container {
-    margin:15px auto;
-    padding:12px;
-  }
-
-  .heading h1 {
-    font-size:23px;
-  }
-
-  .studio {
-    padding:16px;
-  }
+  .topbar {padding:0 12px;height:60px}
+  .logo {font-size:20px}
+  .back-btn {font-size:11px;padding:9px 12px}
+  .container {margin:17px auto;padding:12px}
+  .heading h1 {font-size:23px}
+  .studio {padding:15px}
+  .option-grid {grid-template-columns:repeat(2,1fr)}
+  .preview-box {min-height:220px}
 }
 </style>
 </head>
@@ -138,40 +339,584 @@ button {
 <body>
 
 <header class="topbar">
-
   <div class="logo">✦ IWishAi</div>
-
-  <button
-    class="back-btn"
-    onclick="window.location.href='index.html'"
-  >
+  <button class="back-btn"
+    onclick="window.location.href='index.html'">
     ← Back to Explore
   </button>
-
 </header>
 
 <main class="container">
 
-  <div class="heading">
-    <h1>✦ AI Creation Studio</h1>
-    <p>Turn your imagination into artwork.</p>
-  </div>
+<div class="heading">
+  <h1>✦ AI Creation Studio</h1>
+  <p>Turn your imagination into extraordinary artwork.</p>
+</div>
 
-  <section class="studio">
+<div class="studio">
 
-    <div class="placeholder">
+  <!-- PROMPT -->
 
-      <strong>🎨 Your Creative Studio</strong>
+  <section class="section">
+    <h3>✍️ Describe Your Artwork</h3>
 
-      <span>
-        We're preparing your AI creation workspace.
-      </span>
+    <textarea
+      id="prompt"
+      class="prompt-box"
+      maxlength="5000"
+      placeholder="Describe the image you want to create... Be creative!"></textarea>
+
+    <div class="counter">
+      <span id="promptCount">0</span>/5000
+    </div>
+
+    <textarea
+      id="negativePrompt"
+      class="prompt-box negative"
+      placeholder="Negative prompt (optional): What should the AI avoid?"></textarea>
+  </section>
+
+  <!-- ART STYLE -->
+
+  <section class="section">
+    <h3>🎨 Choose Art Style</h3>
+
+    <div class="option-grid" id="styleOptions">
+      <button class="option active" data-value="Realistic">📸 Realistic</button>
+      <button class="option" data-value="Anime">🌸 Anime</button>
+      <button class="option" data-value="Fantasy">⚔️ Fantasy</button>
+      <button class="option" data-value="Cinematic">🎬 Cinematic</button>
+      <button class="option" data-value="Digital Art">🖌 Digital Art</button>
+      <button class="option" data-value="3D Render">💎 3D Render</button>
+      <button class="option" data-value="Cyberpunk">🌃 Cyberpunk</button>
+      <button class="option" data-value="Oil Painting">🎭 Oil Painting</button>
+      <button class="option" data-value="Watercolor">🖼 Watercolor</button>
+    </div>
+  </section>
+
+  <!-- ASPECT RATIO -->
+
+  <section class="section">
+    <h3>📐 Aspect Ratio</h3>
+
+    <div class="ratio-grid" id="ratioOptions">
+      <button class="option active" data-value="1:1">1:1 Square</button>
+      <button class="option" data-value="9:16">9:16 Portrait</button>
+      <button class="option" data-value="9:20">9:20 Wallpaper</button>
+      <button class="option" data-value="16:9">16:9 Landscape</button>
+      <button class="option" data-value="4:3">4:3 Classic</button>
+      <button class="option" data-value="3:4">3:4 Portrait</button>
+    </div>
+  </section>
+
+  <!-- RESOLUTION -->
+
+  <section class="section">
+    <h3>⚡ Image Resolution</h3>
+
+    <div class="resolution-grid" id="resolutionOptions">
+
+      <button class="option resolution active" data-value="2K">
+        <strong>2K</strong>
+        <span>Standard HD</span>
+      </button>
+
+      <button class="option resolution" data-value="4K">
+        <strong>4K</strong>
+        <span>Ultra HD</span>
+      </button>
+
+      <button class="option resolution" data-value="8K">
+        <strong>8K</strong>
+        <span>Upscaling</span>
+      </button>
+
+    </div>
+
+    <small>
+      8K will use an upscaling stage where supported.
+    </small>
+  </section>
+
+  <!-- AI MODEL -->
+
+  <section class="section">
+    <h3>🤖 Choose AI Model</h3>
+
+    <select id="aiModel">
+      <option value="gpt-image-1.5">
+        OpenAI GPT Image 1.5
+      </option>
+      <option value="other">
+        Other AI models — Coming soon
+      </option>
+    </select>
+
+    <p>
+      <small>Available models and resolutions will depend on the connected provider.</small>
+    </p>
+  </section>
+
+  <!-- REFERENCE IMAGE -->
+
+  <section class="section">
+    <h3>🖼 Reference Image (Optional)</h3>
+
+    <div class="upload-area">
+      <label for="referenceInput">
+        <strong>＋ Upload Reference Image</strong>
+        <span style="font-size:12px;color:#aaa">
+          JPG, PNG or WEBP
+        </span>
+        <p>Choose an image to guide your creation.</p>
+      </label>
+
+      <input
+        type="file"
+        id="referenceInput"
+        accept="image/jpeg,image/png,image/webp">
+
+      <img id="referencePreview" alt="Reference preview">
+    </div>
+  </section>
+
+  <!-- GENERATE -->
+
+  <section class="section">
+
+    <button class="generate-btn" id="generateButton">
+      ✦ Generate AI Artwork
+    </button>
+
+    <p id="generationStatus" class="status">
+      Your creative journey starts here.
+    </p>
+
+  </section>
+
+  <!-- GENERATED PREVIEW -->
+
+  <section class="section">
+
+    <h3>✨ Your Generated Artwork</h3>
+
+    <div class="preview-box">
+
+      <div class="preview-placeholder" id="previewPlaceholder">
+        <strong>🎨</strong>
+        Your artwork will appear here.
+      </div>
+
+      <img id="generatedPreview" alt="Generated artwork">
 
     </div>
 
   </section>
 
+  <!-- PUBLISH -->
+
+  <section class="section">
+
+    <h3>🌍 Share With The Community</h3>
+
+    <p style="font-size:12px;color:#aaa">
+      Choose who can see your artwork.
+    </p>
+
+    <div class="publish-options">
+
+      <button class="visibility active" data-visibility="public">
+        🌍 Public
+      </button>
+
+      <button class="visibility" data-visibility="private">
+        🔒 Private
+      </button>
+
+    </div>
+
+    <button
+      class="publish-btn"
+      id="publishButton"
+      disabled>
+      🚀 Publish Artwork
+    </button>
+
+    <p id="publishStatus" class="status">
+      Generate an image before publishing.
+    </p>
+
+  </section>
+
+</div>
+
+<p class="footer-note">
+  © 2026 IWishAi · Imagine. Create. Share. ✦
+</p>
+
 </main>
+
+<script>
+
+/* ==========================================
+   SUPABASE CONNECTION
+   ========================================== */
+
+const SUPABASE_URL =
+  "https://imqxdmmkmxpltosghzzc.supabase.co";
+
+const SUPABASE_PUBLISHABLE_KEY =
+  "sb_publishable_M7OVWWuO4ksT0pxV2t7v7w_fj4su0RV";
+
+const supabaseClient =
+  window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_PUBLISHABLE_KEY
+  );
+
+const ARTWORK_BUCKET = "iwishai-artworks";
+
+let currentUser = null;
+let generatedBlob = null;
+let generatedObjectURL = null;
+let selectedStyle = "Realistic";
+let selectedRatio = "1:1";
+let selectedResolution = "2K";
+let selectedVisibility = "public";
+let referenceFile = null;
+
+/* ==========================================
+   CHECK USER SESSION
+   ========================================== */
+
+async function checkUser() {
+
+  const { data, error } =
+    await supabaseClient.auth.getSession();
+
+  if (error) {
+    console.error(error);
+    return;
+  }
+
+  currentUser = data.session?.user || null;
+
+  if (!currentUser) {
+    document.getElementById("generationStatus").textContent =
+      "Please log in from the Explore page before creating artwork.";
+  }
+}
+
+checkUser();
+
+/* ==========================================
+   OPTION SELECTORS
+   ========================================== */
+
+function setupOptions(containerId, callback) {
+
+  const container = document.getElementById(containerId);
+
+  container.querySelectorAll(".option").forEach(button => {
+
+    button.addEventListener("click", () => {
+
+      container.querySelectorAll(".option").forEach(item => {
+        item.classList.remove("active");
+      });
+
+      button.classList.add("active");
+
+      callback(button.dataset.value);
+
+    });
+
+  });
+
+}
+
+setupOptions("styleOptions", value => {
+  selectedStyle = value;
+});
+
+setupOptions("ratioOptions", value => {
+  selectedRatio = value;
+});
+
+setupOptions("resolutionOptions", value => {
+  selectedResolution = value;
+});
+
+/* ==========================================
+   PROMPT COUNTER
+   ========================================== */
+
+document.getElementById("prompt").addEventListener(
+  "input", event => {
+
+    document.getElementById("promptCount").textContent =
+      event.target.value.length;
+
+  }
+);
+
+/* ==========================================
+   REFERENCE IMAGE PREVIEW
+   ========================================== */
+
+document.getElementById("referenceInput").addEventListener(
+  "change", event => {
+
+    const file = event.target.files[0];
+
+    if (!file) return;
+
+    if (file.size > 20 * 1024 * 1024) {
+      alert("Reference image must be smaller than 20 MB.");
+      event.target.value = "";
+      return;
+    }
+
+    if (referenceFile && referenceFile.type.startsWith("image/")) {
+      // Release the previous preview URL below.
+    }
+
+    referenceFile = file;
+
+    const preview =
+      document.getElementById("referencePreview");
+
+    if (preview.dataset.objectUrl) {
+      URL.revokeObjectURL(preview.dataset.objectUrl);
+    }
+
+    const objectUrl = URL.createObjectURL(file);
+
+    preview.src = objectUrl;
+    preview.dataset.objectUrl = objectUrl;
+    preview.style.display = "block";
+
+  }
+);
+
+/* ==========================================
+   VISIBILITY SELECTION
+   ========================================== */
+
+document.querySelectorAll(".visibility").forEach(button => {
+
+  button.addEventListener("click", () => {
+
+    document.querySelectorAll(".visibility").forEach(item => {
+      item.classList.remove("active");
+    });
+
+    button.classList.add("active");
+
+    selectedVisibility = button.dataset.visibility;
+
+  });
+
+});
+
+/* ==========================================
+   IMAGE PREVIEW FUNCTION
+   ========================================== */
+
+function showGeneratedImage(blob) {
+
+  if (!blob || !blob.type.startsWith("image/")) {
+    throw new Error("Invalid generated image.");
+  }
+
+  if (generatedObjectURL) {
+    URL.revokeObjectURL(generatedObjectURL);
+  }
+
+  generatedBlob = blob;
+
+  generatedObjectURL = URL.createObjectURL(blob);
+
+  const preview =
+    document.getElementById("generatedPreview");
+
+  preview.src = generatedObjectURL;
+  preview.style.display = "block";
+
+  document.getElementById("previewPlaceholder").style.display =
+    "none";
+
+  document.getElementById("publishButton").disabled = false;
+
+}
+
+/* ==========================================
+   GENERATION BUTTON
+   ========================================== */
+
+document.getElementById("generateButton").addEventListener(
+  "click", async () => {
+
+    const prompt =
+      document.getElementById("prompt").value.trim();
+
+    const status =
+      document.getElementById("generationStatus");
+
+    if (!prompt) {
+      status.textContent =
+        "Please describe the artwork you want to create.";
+      return;
+    }
+
+    const { data } =
+      await supabaseClient.auth.getSession();
+
+    if (!data.session) {
+      status.textContent =
+        "Please log in from the Explore page first.";
+      return;
+    }
+
+    status.textContent =
+      "Generation API connection is our next setup step.";
+
+    alert(
+      "Your creation controls are ready! Next we'll securely connect the AI image-generation API."
+    );
+
+  }
+);
+
+/* ==========================================
+   PUBLISH GENERATED ARTWORK
+   ========================================== */
+
+document.getElementById("publishButton").addEventListener(
+  "click", async () => {
+
+    const status =
+      document.getElementById("publishStatus");
+
+    const button =
+      document.getElementById("publishButton");
+
+    if (!generatedBlob) {
+      status.textContent =
+        "Generate an artwork before publishing.";
+      return;
+    }
+
+    if (button.disabled) return;
+
+    button.disabled = true;
+    status.textContent = "Publishing your artwork...";
+
+    let uploadedPath = null;
+
+    try {
+
+      const { data: userData, error: userError } =
+        await supabaseClient.auth.getUser();
+
+      if (userError || !userData.user) {
+        throw new Error("Please log in again.");
+      }
+
+      currentUser = userData.user;
+
+      const extension =
+        generatedBlob.type === "image/png" ? "png" :
+        generatedBlob.type === "image/webp" ? "webp" : "jpg";
+
+      const filePath =
+        `${currentUser.id}/${crypto.randomUUID()}.${extension}`;
+
+      const { error: uploadError } =
+        await supabaseClient.storage
+          .from(ARTWORK_BUCKET)
+          .upload(filePath, generatedBlob, {
+            contentType: generatedBlob.type,
+            cacheControl: "3600",
+            upsert: false
+          });
+
+      if (uploadError) throw uploadError;
+
+      uploadedPath = filePath;
+
+      const { data: publicData } =
+        supabaseClient.storage
+          .from(ARTWORK_BUCKET)
+          .getPublicUrl(filePath);
+
+      const imageUrl = publicData.publicUrl;
+
+      const prompt =
+        document.getElementById("prompt").value.trim();
+
+      const title =
+        prompt.substring(0, 80) || "AI Artwork";
+
+      const { error: databaseError } =
+        await supabaseClient
+          .from("artworks")
+          .insert({
+            user_id: currentUser.id,
+            title: title,
+            prompt: prompt,
+            image_url: imageUrl,
+            category: selectedStyle.toLowerCase(),
+            visibility: selectedVisibility,
+            status: "published"
+          });
+
+      if (databaseError) throw databaseError;
+
+      status.textContent =
+        selectedVisibility === "public"
+          ? "Artwork published successfully! 🎉"
+          : "Private artwork saved successfully! 🔒";
+
+      alert("Your artwork has been saved to IWishAi!");
+
+      button.textContent = "✓ Published";
+
+    } catch (error) {
+
+      console.error("Publishing error:", error);
+
+      status.textContent = error.message ||
+        "Unable to publish artwork.";
+
+      // Clean up the uploaded object if database insertion failed.
+      if (uploadedPath) {
+        const { error: cleanupError } =
+          await supabaseClient.storage
+            .from(ARTWORK_BUCKET)
+            .remove([uploadedPath]);
+
+        if (cleanupError) {
+          console.error("Storage cleanup error:", cleanupError);
+        }
+      }
+
+    } finally {
+
+      button.disabled = false;
+
+      if (status.textContent.includes("successfully")) {
+        button.textContent = "✓ Published";
+      } else {
+        button.textContent = "🚀 Publish Artwork";
+      }
+
+    }
+
+  }
+);
+
+</script>
 
 </body>
 </html>
