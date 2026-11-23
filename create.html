@@ -622,7 +622,73 @@ async function checkUser() {
 }
 
 checkUser();
+  
+/* ==========================================
+   TEST SECURE XAVIRA CONNECTION
+   ========================================== */
 
+document.getElementById("testXaviraButton")
+.addEventListener("click", async () => {
+
+  const status =
+    document.getElementById("generationStatus");
+
+  const button =
+    document.getElementById("testXaviraButton");
+
+  button.disabled = true;
+  status.textContent = "Checking Xavira connection...";
+
+  try {
+
+    const { data, error } =
+      await supabaseClient.auth.getSession();
+
+    if (error) throw error;
+
+    const session = data.session;
+
+    if (!session) {
+      throw new Error("Please log in first.");
+    }
+
+    const response = await fetch(
+      "/api/xavira-status",
+      {
+        method: "GET",
+        headers: {
+          "Authorization":
+            `Bearer ${session.access_token}`
+        }
+      }
+    );
+
+    const result = await response.json();
+
+    if (!response.ok || !result.success) {
+      throw new Error(result.message || "Connection failed.");
+    }
+
+    status.textContent =
+      "✅ " + result.message +
+      " Credits remaining: " +
+      result.credits_remaining;
+
+  } catch (error) {
+
+    console.error(error);
+
+    status.textContent =
+      "❌ " + error.message;
+
+  } finally {
+
+    button.disabled = false;
+
+  }
+
+});
+  
 /* ==========================================
    OPTION SELECTORS
    ========================================== */
