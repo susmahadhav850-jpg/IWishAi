@@ -3,7 +3,7 @@ const SUPABASE_URL =
   "https://imqxdmmkmxpltosghzzc.supabase.co";
 
 const SUPABASE_KEY =
-  "PASTE_YOUR_EXISTING_SUPABASE_PUBLISHABLE_KEY";
+  "sb_publishable_M7OVWWuO4ksT0pxV2t7v7w_fj4su0RV";
 
 const MODEL =
   "@cf/black-forest-labs/flux-2-klein-9b";
