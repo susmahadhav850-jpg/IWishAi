@@ -831,39 +831,118 @@ function showGeneratedImage(blob) {
 }
 
 /* ==========================================
-   GENERATION BUTTON
+   GENERATION BUTTON - CLOUDFLARE FLUX
    ========================================== */
 
 document.getElementById("generateButton").addEventListener(
   "click", async () => {
 
-    const prompt =
-      document.getElementById("prompt").value.trim();
+    const button =
+      document.getElementById("generateButton");
 
     const status =
       document.getElementById("generationStatus");
 
+    const prompt =
+      document.getElementById("prompt").value.trim();
+
     if (!prompt) {
       status.textContent =
-        "Please describe the artwork you want to create.";
+        "Please describe your artwork first.";
       return;
     }
 
-    const { data } =
-      await supabaseClient.auth.getSession();
+    if (button.disabled) return;
 
-    if (!data.session) {
-      status.textContent =
-        "Please log in from the Explore page first.";
-      return;
-    }
+    button.disabled = true;
+    button.textContent = "Generating artwork...";
 
     status.textContent =
-      "Generation API connection is our next setup step.";
+      "Connecting to FLUX.2 Klein 4B...";
 
-    alert(
-      "Your creation controls are ready! Next we'll securely connect the AI image-generation API."
-    );
+    try {
+
+      const { data, error } =
+        await supabaseClient.auth.getSession();
+
+      if (error) throw error;
+
+      const session = data.session;
+
+      if (!session) {
+        throw new Error("Please log in first.");
+      }
+
+      status.textContent =
+        "Creating your artwork. Please wait... 🎨";
+
+      const response = await fetch(
+        "/api/generate",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization":
+              `Bearer ${session.access_token}`
+          },
+          body: JSON.stringify({
+            prompt: prompt,
+            style: selectedStyle,
+            ratio: selectedRatio
+          })
+        }
+      );
+
+      const result = await response.json();
+
+      if (!response.ok || !result.success) {
+        throw new Error(
+          result.message || "Image generation failed."
+        );
+      }
+
+      if (!result.image ||
+          !result.image.startsWith("data:image/png;base64,")) {
+        throw new Error("Invalid image returned by AI.");
+      }
+
+      // Convert generated Base64 image to Blob.
+
+      const base64 = result.image.split(",")[1];
+
+      const binary = atob(base64);
+
+      const bytes = new Uint8Array(binary.length);
+
+      for (let i = 0; i < binary.length; i++) {
+        bytes[i] = binary.charCodeAt(i);
+      }
+
+      const imageBlob = new Blob(
+        [bytes],
+        { type: "image/png" }
+      );
+
+      // Display generated artwork.
+
+      showGeneratedImage(imageBlob);
+
+      status.textContent =
+        "Artwork generated successfully! 🎉";
+
+    } catch (error) {
+
+      console.error("Generation error:", error);
+
+      status.textContent =
+        error.message || "Something went wrong.";
+
+    } finally {
+
+      button.disabled = false;
+      button.textContent = "✦ Generate AI Artwork";
+
+    }
 
   }
 );
