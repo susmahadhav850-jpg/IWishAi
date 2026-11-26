@@ -1,13 +1,559 @@
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Creator Profile | IWishAi</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Creator Profile | IWishAi</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background: #080811;
+  color: white;
+  font-family: Arial, sans-serif;
+  min-height: 100vh;
+}
+
+.topbar {
+  height: 70px;
+  padding: 0 6%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #11111d;
+  border-bottom: 1px solid #29243c;
+}
+
+.logo {
+  font-size: 25px;
+  font-weight: bold;
+  background: linear-gradient(90deg,#b34cff,#12c9e8);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+.back-btn {
+  color: white;
+  text-decoration: none;
+  background: #242236;
+  padding: 10px 17px;
+  border-radius: 25px;
+}
+
+.container {
+  max-width: 1000px;
+  margin: 45px auto;
+  padding: 0 20px;
+}
+
+.profile-card {
+  background: linear-gradient(145deg,#191727,#11111c);
+  border: 1px solid #39304f;
+  border-radius: 25px;
+  padding: 35px;
+  box-shadow: 0 10px 40px #0008;
+}
+
+.profile-top {
+  display: flex;
+  align-items: center;
+  gap: 25px;
+  flex-wrap: wrap;
+}
+
+.avatar {
+  width: 125px;
+  height: 125px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 4px solid #a84dff;
+  background: #29243c;
+}
+
+.profile-info {
+  flex: 1;
+  min-width: 180px;
+}
+
+.display-name {
+  font-size: 29px;
+  margin-bottom: 8px;
+}
+
+.username {
+  color: #b58aff;
+  font-size: 16px;
+  margin-bottom: 15px;
+}
+
+.bio {
+  color: #c5c2d1;
+  line-height: 1.7;
+  font-size: 15px;
+  overflow-wrap: anywhere;
+}
+
+.edit-btn {
+  border: none;
+  padding: 13px 22px;
+  border-radius: 25px;
+  color: white;
+  font-size: 15px;
+  font-weight: bold;
+  background: linear-gradient(90deg,#a33cff,#09bde2);
+  cursor: pointer;
+}
+
+.edit-btn:disabled {
+  opacity: .4;
+  cursor: not-allowed;
+}
+
+.joined {
+  margin-top: 25px;
+  padding-top: 20px;
+  border-top: 1px solid #343044;
+  color: #9995aa;
+  font-size: 14px;
+}
+
+.section-title {
+  font-size: 23px;
+  margin: 35px 0 20px;
+}
+
+.message {
+  color: #aaa5b9;
+  text-align: center;
+  padding: 25px 10px;
+}
+
+.modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  background: #000c;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+}
+
+.modal-box {
+  width: 100%;
+  max-width: 430px;
+  background: #191727;
+  border: 1px solid #594477;
+  border-radius: 22px;
+  padding: 25px;
+}
+
+.modal-box h2 {
+  margin-bottom: 20px;
+}
+
+.modal-box label {
+  display: block;
+  color: #c8c3d6;
+  margin: 14px 0 7px;
+  font-size: 14px;
+}
+
+.modal-box input,
+.modal-box textarea {
+  width: 100%;
+  background: #0e0d19;
+  color: white;
+  border: 1px solid #39334c;
+  border-radius: 10px;
+  padding: 13px;
+  font-size: 15px;
+  outline: none;
+}
+
+.modal-box textarea {
+  resize: vertical;
+  min-height: 90px;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 22px;
+}
+
+.modal-actions button {
+  flex: 1;
+  padding: 13px;
+  border-radius: 25px;
+  border: none;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.cancel-btn {
+  background: #302c40;
+  color: white;
+}
+
+.save-btn {
+  background: linear-gradient(90deg,#a33cff,#09bde2);
+  color: white;
+  font-weight: bold;
+}
+
+@media(max-width:600px) {
+  .container {
+    margin-top: 25px;
+  }
+
+  .profile-card {
+    padding: 23px;
+  }
+
+  .profile-top {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .profile-info {
+    width: 100%;
+  }
+
+  .edit-btn {
+    width: 100%;
+  }
+}
+</style>
 </head>
+
 <body>
 
-  <h1>IWishAi Creator Profile</h1>
+<header class="topbar">
+  <div class="logo">IWishAi</div>
+  <a href="index.html" class="back-btn">← Explore</a>
+</header>
+
+<main class="container">
+
+  <section class="profile-card">
+
+    <div class="profile-top">
+
+      <img
+        id="profileAvatar"
+        class="avatar"
+        src="https://placehold.co/200x200/252238/ffffff?text=Creator"
+        alt="Creator avatar"
+      >
+
+      <div class="profile-info">
+        <h1 class="display-name" id="displayName">
+          Loading profile...
+        </h1>
+
+        <div class="username" id="username">@loading</div>
+
+        <p class="bio" id="bio">
+          Loading creator information...
+        </p>
+      </div>
+
+      <button
+        class="edit-btn"
+        id="editButton"
+        onclick="openEditProfile()"
+        disabled
+      >
+        ✏️ Edit Profile
+      </button>
+
+    </div>
+
+    <div class="joined" id="joinedDate">
+      Joined: Loading...
+    </div>
+
+  </section>
+
+  <h2 class="section-title">🎨 Creator's Artwork</h2>
+
+  <div class="message" id="artworkMessage">
+    Artwork gallery will be added in the next step.
+  </div>
+
+</main>
+
+<!-- EDIT PROFILE POPUP -->
+
+<div class="modal" id="editModal">
+
+  <div class="modal-box">
+
+    <h2>✏️ Edit Profile</h2>
+
+    <label for="editAvatar">Profile Picture URL</label>
+    <input id="editAvatar" type="url"
+      placeholder="Enter image URL">
+
+    <label for="editUsername">Username</label>
+    <input id="editUsername" type="text"
+      maxlength="30" placeholder="Your username">
+
+    <label for="editDisplayName">Display Name</label>
+    <input id="editDisplayName" type="text"
+      maxlength="50" placeholder="Your display name">
+
+    <label for="editBio">Bio</label>
+    <textarea id="editBio" maxlength="300"
+      placeholder="Tell everyone about yourself..."></textarea>
+
+    <div class="modal-actions">
+      <button class="cancel-btn"
+        onclick="closeEditProfile()">Cancel</button>
+
+      <button class="save-btn"
+        id="saveButton"
+        onclick="saveProfile()">Save</button>
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+/* ==================================
+   SUPABASE CONNECTION
+   ================================== */
+
+// Replace these two placeholders with the
+// exact URL and publishable key from index.html.
+
+const SUPABASE_URL = "PASTE_YOUR_SUPABASE_URL";
+const SUPABASE_KEY = "PASTE_YOUR_SUPABASE_PUBLISHABLE_KEY";
+
+const supabaseClient = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_KEY
+);
+
+let currentUser = null;
+let profileOwnerId = null;
+let currentProfile = null;
+
+
+/* ==================================
+   LOAD CREATOR PROFILE
+   ================================== */
+
+async function loadProfile() {
+
+  const { data: authData, error: authError } =
+    await supabaseClient.auth.getUser();
+
+  if (authError) {
+    console.error(authError);
+  }
+
+  currentUser = authData?.user || null;
+
+  const params = new URLSearchParams(
+    window.location.search
+  );
+
+  profileOwnerId = params.get("user") ||
+    currentUser?.id;
+
+  if (!profileOwnerId) {
+    document.getElementById("displayName").textContent =
+      "Profile unavailable";
+
+    document.getElementById("bio").textContent =
+      "Please log in to view your profile.";
+
+    document.getElementById("joinedDate").textContent = "";
+
+    return;
+  }
+
+  const { data, error } = await supabaseClient
+    .from("profiles")
+    .select("id, username, display_name, avatar_url, bio, created_at")
+    .eq("id", profileOwnerId)
+    .maybeSingle();
+
+  if (error) {
+    console.error("Profile loading error:", error);
+
+    document.getElementById("displayName").textContent =
+      "Could not load profile";
+
+    document.getElementById("bio").textContent =
+      error.message;
+
+    return;
+  }
+
+  if (!data) {
+    document.getElementById("displayName").textContent =
+      "Creator not found";
+
+    document.getElementById("bio").textContent =
+      "This profile may not exist or may not be accessible.";
+
+    return;
+  }
+
+  currentProfile = data;
+
+  document.getElementById("profileAvatar").src =
+    data.avatar_url ||
+    "https://placehold.co/200x200/252238/ffffff?text=Creator";
+
+  document.getElementById("displayName").textContent =
+    data.display_name || data.username || "IWishAi Creator";
+
+  document.getElementById("username").textContent =
+    "@" + (data.username || "creator");
+
+  document.getElementById("bio").textContent =
+    data.bio || "This creator hasn't written a bio yet.";
+
+  const joined = data.created_at
+    ? new Date(data.created_at).toLocaleDateString(
+        undefined,
+        { day: "numeric", month: "long", year: "numeric" }
+      )
+    : "Date unavailable";
+
+  document.getElementById("joinedDate").textContent =
+    "Joined: " + joined;
+
+  // Only the profile owner sees the edit button.
+  if (currentUser && currentUser.id === data.id) {
+    document.getElementById("editButton").disabled = false;
+    document.getElementById("editButton").style.display = "block";
+  } else {
+    document.getElementById("editButton").style.display = "none";
+  }
+}
+
+
+/* ==================================
+   EDIT PROFILE
+   ================================== */
+
+function openEditProfile() {
+
+  if (!currentUser || currentUser.id !== profileOwnerId) {
+    return;
+  }
+
+  document.getElementById("editAvatar").value =
+    currentProfile.avatar_url || "";
+
+  document.getElementById("editUsername").value =
+    currentProfile.username || "";
+
+  document.getElementById("editDisplayName").value =
+    currentProfile.display_name || "";
+
+  document.getElementById("editBio").value =
+    currentProfile.bio || "";
+
+  document.getElementById("editModal").style.display =
+    "flex";
+}
+
+function closeEditProfile() {
+  document.getElementById("editModal").style.display =
+    "none";
+}
+
+
+/* ==================================
+   SAVE PROFILE
+   ================================== */
+
+async function saveProfile() {
+
+  if (!currentUser || currentUser.id !== profileOwnerId) {
+    alert("You cannot edit another creator's profile.");
+    return;
+  }
+
+  const username = document
+    .getElementById("editUsername").value.trim();
+
+  const displayName = document
+    .getElementById("editDisplayName").value.trim();
+
+  const avatarUrl = document
+    .getElementById("editAvatar").value.trim();
+
+  const bio = document
+    .getElementById("editBio").value.trim();
+
+  if (!username) {
+    alert("Please enter a username.");
+    return;
+  }
+
+  const saveButton = document.getElementById("saveButton");
+  saveButton.disabled = true;
+  saveButton.textContent = "Saving...";
+
+  const { data, error } = await supabaseClient
+    .from("profiles")
+    .update({
+      username: username,
+      display_name: displayName || null,
+      avatar_url: avatarUrl || null,
+      bio: bio || null
+    })
+    .eq("id", currentUser.id)
+    .select("id, username, display_name, avatar_url, bio, created_at")
+    .maybeSingle();
+
+  saveButton.disabled = false;
+  saveButton.textContent = "Save";
+
+  if (error) {
+    console.error(error);
+    alert("Could not save profile: " + error.message);
+    return;
+  }
+
+  if (!data) {
+    alert("Profile was not updated. Please check your Supabase permissions.");
+    return;
+  }
+
+  currentProfile = data;
+  closeEditProfile();
+  await loadProfile();
+
+  alert("Profile updated successfully! 🎉");
+}
+
+
+/* ==================================
+   START
+   ================================== */
+
+loadProfile();
+
+</script>
 
 </body>
 </html>
