@@ -949,6 +949,7 @@ document.getElementById("generateButton").addEventListener(
 
 /* ==========================================
    PUBLISH GENERATED ARTWORK
+   PUBLIC + PRIVATE SUPABASE STORAGE
    ========================================== */
 
 document.getElementById("publishButton").addEventListener(
@@ -969,11 +970,15 @@ document.getElementById("publishButton").addEventListener(
     if (button.disabled) return;
 
     button.disabled = true;
-    status.textContent = "Publishing your artwork...";
+    button.textContent = "Publishing...";
 
     let uploadedPath = null;
+    let uploadedBucket = null;
+    let published = false;
 
     try {
+
+      /* VERIFY USER */
 
       const { data: userData, error: userError } =
         await supabaseClient.auth.getUser();
@@ -984,6 +989,15 @@ document.getElementById("publishButton").addEventListener(
 
       currentUser = userData.user;
 
+      /* SELECT STORAGE BUCKET */
+
+      const targetBucket =
+        selectedVisibility === "private"
+          ? "iwishai-private"
+          : "iwishai-artworks";
+
+      /* CREATE UNIQUE FILE PATH */
+
       const extension =
         generatedBlob.type === "image/png" ? "png" :
         generatedBlob.type === "image/webp" ? "webp" : "jpg";
@@ -991,9 +1005,16 @@ document.getElementById("publishButton").addEventListener(
       const filePath =
         `${currentUser.id}/${crypto.randomUUID()}.${extension}`;
 
+      /* UPLOAD IMAGE */
+
+      status.textContent =
+        selectedVisibility === "private"
+          ? "Uploading private artwork... 🔒"
+          : "Uploading public artwork... 🌍";
+
       const { error: uploadError } =
         await supabaseClient.storage
-          .from(ARTWORK_BUCKET)
+          .from(targetBucket)
           .upload(filePath, generatedBlob, {
             contentType: generatedBlob.type,
             cacheControl: "3600",
@@ -1003,13 +1024,18 @@ document.getElementById("publishButton").addEventListener(
       if (uploadError) throw uploadError;
 
       uploadedPath = filePath;
+      uploadedBucket = targetBucket;
+
+      /* GET STORAGE URL */
 
       const { data: publicData } =
         supabaseClient.storage
-          .from(ARTWORK_BUCKET)
+          .from(targetBucket)
           .getPublicUrl(filePath);
 
       const imageUrl = publicData.publicUrl;
+
+      /* PREPARE DATABASE RECORD */
 
       const prompt =
         document.getElementById("prompt").value.trim();
@@ -1017,27 +1043,56 @@ document.getElementById("publishButton").addEventListener(
       const title =
         prompt.substring(0, 80) || "AI Artwork";
 
+      /* SAVE ARTWORK DETAILS */
+
       const { error: databaseError } =
         await supabaseClient
           .from("artworks")
           .insert({
+
             user_id: currentUser.id,
+
             title: title,
+
             prompt: prompt,
+
             image_url: imageUrl,
+
+            storage_bucket: targetBucket,
+
+            storage_path: filePath,
+
             category: selectedStyle.toLowerCase(),
+
             visibility: selectedVisibility,
+
             status: "published"
+
           });
 
       if (databaseError) throw databaseError;
 
-      status.textContent =
-        selectedVisibility === "public"
-          ? "Artwork published successfully! 🎉"
-          : "Private artwork saved successfully! 🔒";
+      /* SUCCESS */
 
-      alert("Your artwork has been saved to IWishAi!");
+      published = true;
+
+      if (selectedVisibility === "public") {
+
+        status.textContent =
+          "🌍 Your artwork is now published publicly! 🎉";
+
+      } else {
+
+        status.textContent =
+          "🔒 Your private artwork has been saved securely!";
+
+      }
+
+      alert(
+        selectedVisibility === "public"
+          ? "Your artwork has been published to IWishAi! 🎉"
+          : "Your private artwork has been saved! 🔒"
+      );
 
       button.textContent = "✓ Published";
 
@@ -1045,26 +1100,32 @@ document.getElementById("publishButton").addEventListener(
 
       console.error("Publishing error:", error);
 
-      status.textContent = error.message ||
-        "Unable to publish artwork.";
+      status.textContent =
+        error.message || "Unable to publish artwork.";
 
-      // Clean up the uploaded object if database insertion failed.
-      if (uploadedPath) {
+      /* CLEAN UP FAILED UPLOAD */
+
+      if (uploadedPath && uploadedBucket) {
+
         const { error: cleanupError } =
           await supabaseClient.storage
-            .from(ARTWORK_BUCKET)
+            .from(uploadedBucket)
             .remove([uploadedPath]);
 
         if (cleanupError) {
-          console.error("Storage cleanup error:", cleanupError);
+          console.error(
+            "Storage cleanup error:",
+            cleanupError
+          );
         }
+
       }
 
     } finally {
 
       button.disabled = false;
 
-      if (status.textContent.includes("successfully")) {
+      if (published) {
         button.textContent = "✓ Published";
       } else {
         button.textContent = "🚀 Publish Artwork";
