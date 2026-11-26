@@ -498,6 +498,7 @@ function closeEditProfile() {
    SAVE PROFILE
    ================================== */
 
+
 async function saveProfile() {
 
   if (!currentUser || currentUser.id !== profileOwnerId) {
@@ -505,61 +506,124 @@ async function saveProfile() {
     return;
   }
 
-  const username = document
-    .getElementById("editUsername").value.trim();
+  const username = document.getElementById("editUsername").value.trim();
+  const displayName = document.getElementById("editDisplayName").value.trim();
+  const avatarUrl = document.getElementById("editAvatar").value.trim();
+  const bio = document.getElementById("editBio").value.trim();
 
-  const displayName = document
-    .getElementById("editDisplayName").value.trim();
-
-  const avatarUrl = document
-    .getElementById("editAvatar").value.trim();
-
-  const bio = document
-    .getElementById("editBio").value.trim();
+  const avatarFile = document.getElementById("avatarFile").files[0];
 
   if (!username) {
     alert("Please enter a username.");
     return;
   }
 
+  let finalAvatarUrl = avatarUrl || null;
+
   const saveButton = document.getElementById("saveButton");
+
   saveButton.disabled = true;
   saveButton.textContent = "Saving...";
 
-  const { data, error } = await supabaseClient
-    .from("profiles")
-    .update({
-      username: username,
-      display_name: displayName || null,
-      avatar_url: avatarUrl || null,
-      bio: bio || null
-    })
-    .eq("id", currentUser.id)
-    .select("id, username, display_name, avatar_url, bio, created_at")
-    .maybeSingle();
+  try {
 
-  saveButton.disabled = false;
-  saveButton.textContent = "Save";
+    /* =================================
+       UPLOAD AVATAR FROM DEVICE
+       ================================= */
 
-  if (error) {
-    console.error(error);
+    if (avatarFile) {
+
+      const allowedTypes = {
+        "image/jpeg": "jpg",
+        "image/png": "png",
+        "image/webp": "webp",
+        "image/gif": "gif"
+      };
+
+      if (!allowedTypes[avatarFile.type]) {
+        throw new Error("Please choose a JPEG, PNG, WebP or GIF image.");
+      }
+
+      if (avatarFile.size > 5 * 1024 * 1024) {
+        throw new Error("Avatar must be smaller than 5 MB.");
+      }
+
+      const extension = allowedTypes[avatarFile.type];
+
+      const filePath =
+        currentUser.id + "/avatar-" +
+        Date.now() + "." + extension;
+
+      const { error: uploadError } =
+        await supabaseClient.storage
+          .from("iwishai-avatars")
+          .upload(filePath, avatarFile, {
+            cacheControl: "3600",
+            contentType: avatarFile.type,
+            upsert: false
+          });
+
+      if (uploadError) {
+        throw uploadError;
+      }
+
+      const { data: publicData } =
+        supabaseClient.storage
+          .from("iwishai-avatars")
+          .getPublicUrl(filePath);
+
+      finalAvatarUrl = publicData.publicUrl;
+    }
+
+    /* =================================
+       UPDATE PROFILE DATABASE RECORD
+       ================================= */
+
+    const { data, error } = await supabaseClient
+      .from("profiles")
+      .update({
+        username: username,
+        display_name: displayName || null,
+        avatar_url: finalAvatarUrl,
+        bio: bio || null
+      })
+      .eq("id", currentUser.id)
+      .select("id, username, display_name, avatar_url, bio, created_at")
+      .maybeSingle();
+
+    if (error) {
+      throw error;
+    }
+
+    if (!data) {
+      throw new Error("Profile was not updated. Check your permissions.");
+    }
+
+    currentProfile = data;
+
+    document.getElementById("avatarFile").value = "";
+
+    closeEditProfile();
+
+    await loadProfile();
+
+    alert("Profile updated successfully! 🎉");
+
+  } catch (error) {
+
+    console.error("Profile save error:", error);
+
     alert("Could not save profile: " + error.message);
-    return;
+
+  } finally {
+
+    saveButton.disabled = false;
+    saveButton.textContent = "Save";
+
   }
-
-  if (!data) {
-    alert("Profile was not updated. Please check your Supabase permissions.");
-    return;
-  }
-
-  currentProfile = data;
-  closeEditProfile();
-  await loadProfile();
-
-  alert("Profile updated successfully! 🎉");
 }
 
-
+  
 /* ==================================
    START
    ================================== */
