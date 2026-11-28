@@ -513,6 +513,41 @@ body {
 
 </div>
 
+<!-- DELETE POST CONFIRMATION POPUP -->
+
+<div class="modal" id="deleteConfirmModal">
+
+  <div class="modal-box">
+
+    <h2>🗑️ Delete Post?</h2>
+
+    <p style="color:#c5c2d1; line-height:1.6;">
+      Are you sure you want to delete this post?
+      This action cannot be undone.
+    </p>
+
+    <div class="modal-actions">
+
+      <button
+        class="cancel-btn"
+        onclick="cancelPendingDelete()">
+        Cancel
+      </button>
+
+      <button
+        class="save-btn"
+        id="confirmDeleteButton"
+        onclick="confirmDeleteArtwork()"
+        style="background:#e04455;">
+        Delete
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
 <script>
 /* ==================================
    SUPABASE CONNECTION
