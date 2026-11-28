@@ -211,6 +211,120 @@ body {
   font-weight: bold;
 }
 
+/* ==================================
+   CREATOR ARTWORK GALLERY
+   ================================== */
+
+.artwork-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.artwork-card {
+  position: relative;
+  overflow: hidden;
+  background: #191727;
+  border: 1px solid #39304f;
+  border-radius: 17px;
+}
+
+.artwork-image {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  display: block;
+  cursor: pointer;
+  background: #242236;
+}
+
+.artwork-details {
+  padding: 14px;
+}
+
+.artwork-title {
+  font-size: 15px;
+  margin-bottom: 9px;
+  overflow-wrap: anywhere;
+}
+
+.artwork-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  color: #aaa5b9;
+  font-size: 12px;
+}
+
+.artwork-like {
+  border: none;
+  background: transparent;
+  color: #ff5b9a;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.prompt-btn {
+  background: #302c40;
+  color: white;
+  border: 1px solid #514765;
+  padding: 8px 12px;
+  border-radius: 18px;
+  cursor: pointer;
+}
+
+.artwork-menu {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 2;
+}
+
+.artwork-menu-button {
+  width: 36px;
+  height: 36px;
+  border: 1px solid #ffffff44;
+  border-radius: 50%;
+  background: #100e1dcc;
+  color: white;
+  font-size: 22px;
+  cursor: pointer;
+}
+
+.delete-menu {
+  display: none;
+  position: absolute;
+  top: 42px;
+  right: 0;
+  min-width: 130px;
+  background: #29243c;
+  border: 1px solid #594477;
+  border-radius: 10px;
+  padding: 10px;
+}
+
+.delete-menu button {
+  width: 100%;
+  background: transparent;
+  border: none;
+  color: #ff7777;
+  padding: 8px;
+  text-align: left;
+  cursor: pointer;
+}
+
+@media(max-width:600px) {
+  .artwork-grid {
+    gap: 12px;
+  }
+
+  .artwork-details {
+    padding: 10px;
+  }
+}
+
 @media(max-width:600px) {
   .container {
     margin-top: 25px;
@@ -287,9 +401,11 @@ body {
 
   <h2 class="section-title">🎨 Creator's Artwork</h2>
 
-  <div class="message" id="artworkMessage">
-    Artwork gallery will be added in the next step.
-  </div>
+  <div class="artwork-grid" id="artworkGrid"></div>
+
+<div class="message" id="artworkMessage">
+  Loading creator's artwork... 🎨
+</div>
 
 </main>
 
