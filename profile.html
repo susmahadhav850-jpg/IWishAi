@@ -921,7 +921,7 @@ async function loadCreatorArtworks() {
     if (ownerCanDelete) {
 
       const menu = document.createElement("div");
-      menu.className = "artwork-menu";
+      menu.className = "artwork-menu-wrap";
 
       const menuButton = document.createElement("button");
       menuButton.className = "artwork-menu-button";
@@ -935,7 +935,8 @@ async function loadCreatorArtworks() {
       const deleteButton = document.createElement("button");
       deleteButton.type = "button";
       deleteButton.textContent = "Delete post";
-
+      deleteButton.className = "delete-post-option";
+      
       menuButton.addEventListener("click", () => {
         menuContent.style.display =
           menuContent.style.display === "block" ? "none" : "block";
