@@ -537,7 +537,7 @@ body {
       <button
         class="save-btn"
         id="confirmDeleteButton"
-        onclick="confirmDeleteArtwork()"
+        onclick="performArtworkDeletion()"
         style="background:#e04455;">
         Delete
       </button>
@@ -1077,6 +1077,100 @@ async function loadCreatorArtworks() {
     "Showing " + artworks.length + " published artwork(s).";
 }
 
+/* ==================================
+   DELETE ARTWORK
+   ================================== */
+
+let pendingDeleteArtwork = null;
+
+// Open confirmation popup
+function confirmDeleteArtwork(artwork) {
+
+  if (!currentUser || currentUser.id !== artwork.user_id) {
+    alert("You can only delete your own artwork.");
+    return;
+  }
+
+  pendingDeleteArtwork = artwork;
+
+  document.getElementById("deleteConfirmModal").style.display = "flex";
+}
+
+// Cancel deletion
+function cancelPendingDelete() {
+
+  pendingDeleteArtwork = null;
+
+  document.getElementById("deleteConfirmModal").style.display = "none";
+}
+
+// Confirm and perform deletion
+async function performArtworkDeletion() {
+
+  const artwork = pendingDeleteArtwork;
+
+  if (!artwork || !currentUser ||
+      currentUser.id !== artwork.user_id) {
+    alert("You cannot delete this artwork.");
+    return;
+  }
+
+  const deleteButton = document.getElementById("confirmDeleteButton");
+
+  deleteButton.disabled = true;
+  deleteButton.textContent = "Deleting...";
+
+  try {
+
+    // Delete image from Supabase Storage
+    if (artwork.storage_bucket && artwork.storage_path) {
+
+      const { error: storageError } = await supabaseClient.storage
+        .from(artwork.storage_bucket)
+        .remove([artwork.storage_path]);
+
+      if (storageError) throw storageError;
+    }
+
+    // Delete artwork record from database
+const { data: deletedArtwork, error: databaseError } =
+  await supabaseClient
+    .from("artworks")
+    .delete()
+    .eq("id", artwork.id)
+    .eq("user_id", currentUser.id)
+    .select("id")
+    .maybeSingle();
+
+if (databaseError) throw databaseError;
+
+if (!deletedArtwork) {
+  throw new Error(
+    "Artwork was not deleted. Please check your database permissions."
+  );
+}
+
+    pendingDeleteArtwork = null;
+
+    document.getElementById("deleteConfirmModal").style.display = "none";
+
+    alert("Artwork deleted successfully! 🗑️");
+
+    await loadCreatorArtworks();
+
+  } catch (error) {
+
+    console.error("Artwork deletion error:", error);
+
+    alert("Could not delete artwork: " + error.message);
+
+  } finally {
+
+    deleteButton.disabled = false;
+    deleteButton.textContent = "Delete";
+
+  }
+}
   
 /* ==================================
    START
